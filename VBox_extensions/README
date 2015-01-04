@@ -1,0 +1,13 @@
+README
+
+- sudo adduser maas sudo
+- maas user (interactive)
+- - sudo -u maas chsh -s /bin/bash
+- - sudo passwd maas
+
+- installation instructions
+
+VBoxManage list vms
+- Take the last bit:
+"Net Testing" {51d35b5c-a3bf-4036-9320-ee67e1f3b27f}
+ee67e1f3b27f >> ee:67:e1:f3:b2:7f

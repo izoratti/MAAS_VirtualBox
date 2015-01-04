@@ -1,0 +1,67 @@
+# -*- mode: shell-script -*-
+#
+#
+# Copyright (C) 2015  Ivan Zoratti
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+#
+# @ether_wake.template - MAAS template for power up machines with the
+#                        Wake-On-LAN option - conversion to use
+#                        VirtualBox VMs
+#
+# @verbatim
+# Revision History
+#
+# Date          Who             Description
+# 2015-01-01    Ivan Zoratti    First Version
+#
+# @endverbatim
+#
+
+#
+# Control node power through WOL, via `wakeonlan` or `etherwake`.
+#
+
+mac_address={{mac_address}}
+power_change={{power_change}}
+
+home_dir=`grep "maas" /etc/passwd | cut -d: -f6`
+
+if [ "${power_change}" != 'on' ]
+then
+    echo "There is no way to power down a node through etherwake." >&2
+    exit 1
+elif [ -x ${home_dir}/VBox_extensions/power_on ]
+then
+    ${home_dir}/VBox_extensions/power_on $mac_address
+
+    echo "VirtualBox:" `date` "\n" \
+         "HOME: ${home_dir}\n" \
+         "MAC Address: ${mac_address}\n" \
+         "Power Change: ${power_change}\n" >> /tmp/VBox.log
+
+else
+
+    echo "VirtualBox:" `date` "\n" \
+         "No wakeonlan or etherwake program found." /tmp/VBox.log
+
+    echo "No wakeonlan or etherwake program found." >&2
+
+fi
+
+exit 0
+

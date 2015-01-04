@@ -1,0 +1,76 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2015  Ivan Zoratti
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+#
+# @install_extensions - This program installs the VirtualBox extensions on 
+#                       a host VirtualBox machine and on the MAAS server.
+#
+# @verbatim
+# Revision History
+#
+# Date          Who             Description
+# 2015-01-01    Ivan Zoratti    First Version
+#
+# @endverbatim
+#
+
+#set -x
+
+# Che3ck the existence and format of the argument
+[ $# -eq 0 ] && { echo "Usage: $0 user@vbox_host_address"; exit 1; }
+[[ ! $1 == *"@"* ]] && { echo "The parameter for $0 must be in the format user@vbox_host_address"; exit 1; }
+
+echo "VirtualBox extensions installation program"
+echo "You will be required to enter the user password for sudo access"
+echo "and the remote user password on the VirtualBox host for ssh access..."
+
+# Save the API key
+echo -e "\nRetrieving the MAAS API key - sudo access required..."
+sudo maas-region-admin apikey --username=admin > ~/VBox_extensions/maas-api-key
+chmod 600 ~/VBox_extensions/maas-api-key
+
+# Copy the Wake-On-LAN / VirtualBox template
+echo "Copying the Wake-On-LAN / VirtualBox template..."
+sudo cp -f ~/VBox_extensions/ether_wake.template /etc/maas/templates/power/ether_wake.template
+
+# Generate the id_rsa_pub key
+if [ ! -d ~/.ssh ]
+then
+	echo -e "\nCreating the ~/.ssh folder..."
+	mkdir ~/.ssh
+fi
+
+echo -e "\nGenerating a new public key."
+echo "You should answer yes if a key file already exists and you want to overwrite it"
+cd ~/.ssh
+ssh-keygen -t rsa -f ~/.ssh/id_rsa -N '' -q
+
+# Copy the id_rsa_pub key
+echo -e "\nCopying the key file to the VirtualBox host machine"
+echo "You should enter the password for ${1}"
+ssh-copy-id -i ~/.ssh/id_rsa $1
+
+# Copy the extensions on the VirtualBox host machine
+echo -e "\nCopying the VirtualBox host extensions..."
+scp -r ~/VBox_extensions/VBox_host_extensions ${1}:.
+
+echo -e "\nInstallation completed.\n"
+
+exit 0

@@ -1,0 +1,63 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2015  Ivan Zoratti
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+#
+# @power_off - This program shuts down a given VM with an unconditioned poweroff.
+#              It is installed in the ~/VBox_extensions directory
+#              of the maas user in the MAAS server.
+#
+# @verbatim
+# Revision History
+#
+# Date          Who             Description
+# 2015-01-01    Ivan Zoratti    First Version
+#
+# @endverbatim
+#
+
+# Login to MAAS
+/usr/bin/maas login maas http://localhost/MAAS `cat ~/VBox_extensions/maas-api-key`
+
+# Retrieve the id from the MAAS Power address
+vm_to_kill=${1//:}
+
+# Loop through all the zones to send the request to all the VBox host machines
+for zone_description in `maas maas zones read | grep '"description": "' | cut -d: -f 2`
+do
+        # Remove the "s
+        vbox_host_credentials=${zone_description//\"}
+
+        # Check if there is the @ sign, typical of ssh user@address
+        if [[ ${vbox_host_credentials} == *"@"* ]]
+        then
+                # Create the command string
+                command_to_execute="ssh ${vbox_host_credentials} '~/VBox_host_extensions/killvm ${vm_to_kill}'"
+                # Execute the command string
+                eval "${command_to_execute}"
+
+                # Log the command
+                echo -e "VirtualBox-Power OFF:" `date` "\n" \
+                        "Credentials: ${vbox_host_credentials}\n" \
+                        "ID: ${vm_to_kill}\n" >> /tmp/VBox.log
+        fi
+done
+
+exit 0
+
