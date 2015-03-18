@@ -28,6 +28,7 @@
 #
 # Date          Who             Description
 # 2015-01-01    Ivan Zoratti    First Version
+# 2015-03-18    Ivan Zoratti    Fixed Bug - "-" were not removed from uuid
 #
 # @endverbatim
 #
@@ -50,7 +51,7 @@ do
         if [[ ${vbox_host_credentials} == *"@"* ]]
         then
                 # Create the command string
-                command_to_execute="ssh ${vbox_host_credentials} '~/VBox_host_extensions/checkvm ${vm_to_check}'"
+                command_to_execute="ssh ${vbox_host_credentials} '~/VBox_host_extensions/checkvm ${vm_to_check//-}'"
                 # Execute the command string
                 eval "${command_to_execute}"
 

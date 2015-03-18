@@ -48,7 +48,7 @@ do
 	if [[ ${vbox_host_credentials} == *"@"* ]]
 	then
 		# Create the command string
-		command_to_execute="ssh ${vbox_host_credentials} '~/VBox_host_extensions/startvm ${vm_to_start}'"
+		command_to_execute="ssh ${vbox_host_credentials} '~/VBox_host_extensions/startvm ${vm_to_start//-}'"
 		# Execute the command string
 		eval "${command_to_execute}"
 

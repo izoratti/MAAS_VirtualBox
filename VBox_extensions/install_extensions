@@ -27,6 +27,7 @@
 #
 # Date          Who             Description
 # 2015-01-01    Ivan Zoratti    First Version
+# 2015-03-18    Ivan Zoratti    Save the original template and install teh new one
 #
 # @endverbatim
 #
@@ -48,6 +49,12 @@ chmod 600 ~/VBox_extensions/maas-api-key
 
 # Copy the Wake-On-LAN / VirtualBox template
 echo "Copying the Wake-On-LAN / VirtualBox template..."
+
+if [ ! -e /etc/maas/templates/power/ether_wake.orig ]
+then
+	sudo mv /etc/maas/templates/power/ether_wake.template /etc/maas/templates/power/ether_wake.orig
+fi
+
 sudo cp -f ~/VBox_extensions/ether_wake.template /etc/maas/templates/power/ether_wake.template
 
 # Generate the id_rsa_pub key
